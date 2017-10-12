@@ -148,7 +148,7 @@ AppModule = __decorate([
 /***/ "../../../../../src/app/components/editor/editor.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<app-header></app-header>\n<div class=\"area-editor\">\n  <app-toolbar></app-toolbar>\n  <app-hoja id=\"hojaApp\"></app-hoja>\n  <app-estructura></app-estructura>\n</div>\n"
+module.exports = "<app-header></app-header>\n<div class=\"area-editor\" [class.inPreview]=\"previewMode\">\n  <app-toolbar></app-toolbar>\n  <app-hoja id=\"hojaApp\"></app-hoja>\n  <app-estructura></app-estructura>\n</div>\n"
 
 /***/ }),
 
@@ -160,7 +160,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".area-editor {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: stretch;\n      -ms-flex-align: stretch;\n          align-items: stretch;\n  max-height: calc(100vh - 67px);\n  overflow: hidden; }\n  .area-editor app-toolbar {\n    width: 250px;\n    overflow-y: auto;\n    background: #fff;\n    box-shadow: 2px 0px 5px 0 rgba(0, 0, 0, 0.26); }\n  .area-editor app-hoja {\n    width: calc(100vw - 500px);\n    overflow-y: auto;\n    background: #afafaf; }\n  .area-editor app-estructura {\n    width: 250px;\n    overflow-y: auto;\n    background: #fff; }\n", ""]);
+exports.push([module.i, ".area-editor {\n  display: -webkit-box;\n  display: -ms-flexbox;\n  display: flex;\n  -webkit-box-pack: justify;\n      -ms-flex-pack: justify;\n          justify-content: space-between;\n  -webkit-box-align: stretch;\n      -ms-flex-align: stretch;\n          align-items: stretch;\n  max-height: calc(100vh - 67px);\n  overflow: hidden; }\n  .area-editor app-toolbar {\n    width: 250px;\n    overflow-y: auto;\n    background: #fff;\n    box-shadow: 2px 0px 5px 0 rgba(0, 0, 0, 0.26); }\n  .area-editor app-hoja {\n    width: calc(100vw - 500px);\n    overflow-y: auto;\n    background: #afafaf; }\n  .area-editor app-estructura {\n    width: 250px;\n    overflow-y: auto;\n    background: #fff; }\n  .area-editor app-toolbar, .area-editor app-hoja, .area-editor app-estructura {\n    transition: all 0.2s ease-out; }\n  .area-editor.inPreview app-toolbar {\n    width: 0;\n    overflow: hidden; }\n  .area-editor.inPreview app-estructura {\n    width: 0;\n    overflow: hidden; }\n  .area-editor.inPreview app-hoja {\n    width: 100%; }\n", ""]);
 
 // exports
 
@@ -176,6 +176,7 @@ module.exports = module.exports.toString();
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return EditorComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services__ = __webpack_require__("../../../../../src/app/components/editor/services/index.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -186,10 +187,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
+
 var EditorComponent = (function () {
-    function EditorComponent() {
+    function EditorComponent(docVarsService) {
+        this.docVarsService = docVarsService;
+        this.previewMode = false;
     }
     EditorComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        //Escuchar cambios en una variable del servicio
+        this.subscription = this.docVarsService.getPreviewMode()
+            .subscribe(function (previewMode) {
+            _this.previewMode = previewMode;
+        });
+    };
+    EditorComponent.prototype.ngOnDestroy = function () {
+        // unsubscribe to ensure no memory leaks
+        this.subscription.unsubscribe();
     };
     return EditorComponent;
 }());
@@ -199,9 +213,10 @@ EditorComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/components/editor/editor.component.html"),
         styles: [__webpack_require__("../../../../../src/app/components/editor/editor.component.scss")]
     }),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */]) === "function" && _a || Object])
 ], EditorComponent);
 
+var _a;
 //# sourceMappingURL=editor.component.js.map
 
 /***/ }),
@@ -209,7 +224,7 @@ EditorComponent = __decorate([
 /***/ "../../../../../src/app/components/editor/estructura/estructura.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"contenido-estructura\">\n  <div class=\"inner\">\n    <p class=\"titulo-estructura\">\n      Árbol del documento\n    </p>\n    <div class=\"bloque-por-hoja\" [id]=\"'sheet_'+s\" *ngFor=\"let sheet of editableBlocks; let s=index\">\n      <ul class=\"elementos\" dnd-sortable-container [sortableData]=\"sheet\">\n        <li *ngFor=\"let block of sheet; let i=index;\"\n            dnd-sortable [sortableIndex]=\"i\" (onDropSuccess)=\"reOrderSuccess($event)\">\n          <span>\n            <i class=\"glyphicon glyphicon-menu-hamburger\"></i>\n            {{i+1}}\n          </span>\n          <ng-container [ngSwitch]=\"block.type\">\n            <div class=\"content\" *ngSwitchCase=\"'signers'\">Área de Firmantes</div>\n            <div class=\"content\" *ngSwitchCase=\"'space'\">[ESPACIO]</div>\n            <div class=\"content\" *ngSwitchCase=\"'lorem'\">Lorem</div>\n            <div [innerHTML]=\"block.content\" class=\"content\" *ngSwitchDefault>...</div>\n          </ng-container>\n        </li>\n      </ul>\n    </div>\n  </div>\n</div>\n"
+module.exports = "<div class=\"contenido-estructura\">\n  <div class=\"inner\">\n    <p class=\"titulo-estructura\">\n      Árbol del documento\n    </p>\n    <div class=\"bloque-por-hoja\" [id]=\"'sheet_'+s\" *ngFor=\"let sheet of editableBlocks; let s=index\">\n      <ul class=\"elementos\" dnd-sortable-container [sortableData]=\"sheet\">\n        <li *ngFor=\"let block of sheet; let i=index;\"\n            dnd-sortable [sortableIndex]=\"i\" (onDropSuccess)=\"reOrderSuccess($event)\">\n          <span>\n            <i class=\"glyphicon glyphicon-menu-hamburger\"></i>\n            {{i+1}}\n          </span>\n          <ng-container [ngSwitch]=\"block.type\">\n            <div class=\"content\" *ngSwitchCase=\"'header'\">Header</div>\n            <div class=\"content\" *ngSwitchCase=\"'signers'\">Área de Firmantes</div>\n            <div class=\"content\" *ngSwitchCase=\"'space'\">[ESPACIO]</div>\n            <div class=\"content\" *ngSwitchCase=\"'lorem'\">Lorem</div>\n            <div [innerHTML]=\"block.content\" class=\"content\" *ngSwitchDefault>...</div>\n          </ng-container>\n        </li>\n      </ul>\n    </div>\n  </div>\n</div>\n"
 
 /***/ }),
 
@@ -221,7 +236,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".contenido-estructura {\n  height: 100%;\n  padding: 30px 20px;\n  color: #555; }\n\np.titulo-estructura {\n  font-weight: bold;\n  margin-bottom: 20px;\n  padding-bottom: 10px;\n  border-bottom: 1px solid #fff; }\n\n.bloque-por-hoja {\n  margin-bottom: 20px; }\n  .bloque-por-hoja .hoja-separador {\n    margin-bottom: 15px;\n    font-weight: bold; }\n  .bloque-por-hoja ul.elementos {\n    list-style: none;\n    font-size: 12px; }\n    .bloque-por-hoja ul.elementos li {\n      margin-bottom: 10px;\n      display: -webkit-box;\n      display: -ms-flexbox;\n      display: flex;\n      -webkit-box-pack: justify;\n          -ms-flex-pack: justify;\n              justify-content: space-between;\n      -webkit-box-align: baseline;\n          -ms-flex-align: baseline;\n              align-items: baseline;\n      cursor: pointer; }\n      .bloque-por-hoja ul.elementos li span {\n        margin-right: 8px;\n        display: block;\n        width: 25px;\n        position: relative; }\n        .bloque-por-hoja ul.elementos li span i {\n          display: inline-block;\n          margin-right: 3px;\n          vertical-align: baseline; }\n      .bloque-por-hoja ul.elementos li div.content {\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        line-height: 14px;\n        max-height: 14px;\n        width: calc(100% - 40px); }\n", ""]);
+exports.push([module.i, ".contenido-estructura {\n  height: 100%;\n  padding: 30px 20px;\n  color: #555; }\n\np.titulo-estructura {\n  font-weight: bold;\n  margin-bottom: 20px;\n  padding-bottom: 10px;\n  border-bottom: 1px solid #fff; }\n\n.bloque-por-hoja {\n  margin-bottom: 20px; }\n  .bloque-por-hoja .hoja-separador {\n    margin-bottom: 15px;\n    font-weight: bold; }\n  .bloque-por-hoja ul.elementos {\n    list-style: none;\n    font-size: 12px; }\n    .bloque-por-hoja ul.elementos li {\n      margin-bottom: 10px;\n      display: -webkit-box;\n      display: -ms-flexbox;\n      display: flex;\n      -webkit-box-pack: justify;\n          -ms-flex-pack: justify;\n              justify-content: space-between;\n      -webkit-box-align: baseline;\n          -ms-flex-align: baseline;\n              align-items: baseline;\n      cursor: pointer; }\n      .bloque-por-hoja ul.elementos li span {\n        margin-right: 8px;\n        display: block;\n        width: 30px;\n        position: relative; }\n        .bloque-por-hoja ul.elementos li span i {\n          display: inline-block;\n          margin-right: 3px;\n          vertical-align: baseline;\n          font-size: 9px; }\n      .bloque-por-hoja ul.elementos li div.content {\n        white-space: nowrap;\n        overflow: hidden;\n        text-overflow: ellipsis;\n        line-height: 14px;\n        max-height: 14px;\n        width: calc(100% - 40px); }\n", ""]);
 
 // exports
 
@@ -284,7 +299,7 @@ var _a;
 /***/ "../../../../../src/app/components/editor/header/header.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"contenido-header\">\n  <h1 class=\"titulo\">\n    <span class=\"glyphicon glyphicon-edit\"></span>\n    Editor de Contratos\n  </h1>\n  <div class=\"tools\">\n    <ul>\n      <li>\n        <button title=\"Vista Previa\" (click)=\"previewDocument()\">\n          <span class=\"glyphicon glyphicon-eye-open\"></span>\n        </button>\n      </li>\n      <li>\n        <button title=\"Descargar\" (click)=\"downloadDocument()\">\n          <span class=\"glyphicon glyphicon-download-alt\"></span>\n        </button>\n      </li>\n    </ul>\n  </div>\n</div>\n"
+module.exports = "<div class=\"contenido-header\">\n  <h1 class=\"titulo\">\n    <span class=\"glyphicon glyphicon-edit\"></span>\n    Editor de Contratos\n  </h1>\n  <div class=\"tools\">\n    <ul>\n      <li>\n        <button (click)=\"previewDocument()\"\n                [title]=\"inPreviewMode ? 'Cerrar vista previa' : 'Vista previa'\">\n          <span class=\"glyphicon\"\n            [class.glyphicon-eye-open]=\"!inPreviewMode\"\n            [class.glyphicon-eye-close]=\"inPreviewMode\">\n          </span>\n        </button>\n      </li>\n      <li>\n        <button title=\"Descargar\" (click)=\"downloadDocument()\">\n          <span class=\"glyphicon glyphicon-download-alt\"></span>\n        </button>\n      </li>\n    </ul>\n  </div>\n</div>\n"
 
 /***/ }),
 
@@ -312,7 +327,7 @@ module.exports = module.exports.toString();
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return HeaderComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_editable_blocks_service__ = __webpack_require__("../../../../../src/app/components/editor/services/editable-blocks.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services__ = __webpack_require__("../../../../../src/app/components/editor/services/index.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -325,14 +340,46 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var HeaderComponent = (function () {
-    function HeaderComponent(editableBlocksService) {
+    function HeaderComponent(editableBlocksService, docVarsService) {
         this.editableBlocksService = editableBlocksService;
+        this.docVarsService = docVarsService;
         this.editableBlocks = [];
+        this.mapSigners = [];
+        this.inPreviewMode = false;
     }
     HeaderComponent.prototype.ngOnInit = function () {
+        this.mapSigners = this.docVarsService.mapSigners;
     };
     HeaderComponent.prototype.previewDocument = function () {
-        alert('Previsualizar');
+        this.inPreviewMode = this.docVarsService.inPreviewMode;
+        // $(element).position().top / $('.hoja').height() * 100
+        if (!this.inPreviewMode) {
+            var coordinates_1 = [];
+            $('.signerSpace').each(function () {
+                var parentPos = $(this).closest('.block').position();
+                var signerPos = $(this).position();
+                var signerId = $(this).data('id');
+                // let topPercentage = (parentPos.top+signerPos.top) / $('.hoja').height() * 100+'%';
+                // let leftPercentage = (parentPos.left+signerPos.left) / $('.hoja').width() * 100+'%';
+                // topPercentage = parentPos.top+signerPos.top+'px';
+                // leftPercentage = parentPos.left+signerPos.left+'px';
+                var topPercentage = parentPos.top / $('.hoja').outerHeight() * 100;
+                var leftPercentage = parentPos.left / $('.hoja').outerWidth() * 100;
+                topPercentage += signerPos.top / $('.hoja').outerHeight() * 100;
+                leftPercentage += signerPos.left / $('.hoja').outerWidth() * 100;
+                coordinates_1.push({
+                    top: topPercentage + '%',
+                    left: leftPercentage + '%',
+                    idSigner: signerId
+                });
+            });
+            this.docVarsService.generateMapsSigners(coordinates_1);
+        }
+        else {
+            this.docVarsService.resetMapSigners();
+        }
+        this.inPreviewMode = this.inPreviewMode ? false : true;
+        this.docVarsService.setPreviewMode(this.inPreviewMode);
     };
     HeaderComponent.prototype.downloadDocument = function () {
         alert('Descargar');
@@ -350,10 +397,10 @@ HeaderComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/components/editor/header/header.component.html"),
         styles: [__webpack_require__("../../../../../src/app/components/editor/header/header.component.scss")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services_editable_blocks_service__["a" /* EditableBlocksService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services_editable_blocks_service__["a" /* EditableBlocksService */]) === "function" && _a || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */]) === "function" && _b || Object])
 ], HeaderComponent);
 
-var _a;
+var _a, _b;
 //# sourceMappingURL=header.component.js.map
 
 /***/ }),
@@ -361,7 +408,7 @@ var _a;
 /***/ "../../../../../src/app/components/editor/hoja/hoja.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"contenedor-hoja\" (click)=\"saveOpenEditable($event)\" id=\"sheetsContainer\">\n  <div class=\"hoja\" [id]=\"'sheet_'+s\" *ngFor=\"let sheet of editableBlocks; let s=index\" [class.loaded]=\"pageLoaded\">\n    <div class=\"inner-hoja\" [id]=\"'innerSheet_'+s\">\n\n      <div class=\"block\" *ngFor=\"let editable of sheet; let ed=index\" [class.active]=\"i===activeBlock\">\n          <div class=\"editable-content {{editable.type}}\" (click)=\"edit(s,ed,$event)\" [id]=\"'sheet_'+s+'_edit_'+ed\"\n          [innerHTML]=\"editable.content | safeHtml\">\n        </div>\n        <button (click)=\"deleteBlock(s,ed)\" type=\"button\" class=\"close\" aria-label=\"Close\">\n          <span aria-hidden=\"true\">&times;</span>\n        </button>\n      </div>\n\n      <div class=\"page-break\" [style.top]=\"(pageHeight*page)+'px'\" *ngFor=\"let page of pageCounter | times\">\n        <span>Página {{page}}</span>\n      </div>\n    </div>\n  </div>\n</div>\n"
+module.exports = "<div class=\"contenedor-hoja\" (click)=\"saveOpenEditable($event)\" id=\"sheetsContainer\">\n  <div class=\"hoja\" [id]=\"'sheet_'+s\" [class.loaded]=\"pageLoaded\" [class.inPreview]=\"previewMode\"\n       *ngFor=\"let sheet of editableBlocks; let s=index\">\n    <div class=\"inner-hoja\" [id]=\"'innerSheet_'+s\">\n\n      <div class=\"block\" *ngFor=\"let editable of sheet; let ed=index\" [class.active]=\"i===activeBlock\">\n        <button (click)=\"deleteBlock(s,ed)\" type=\"button\" class=\"close\" aria-label=\"Close\">\n          <span aria-hidden=\"true\">&times;</span>\n        </button>\n        <div class=\"editable-content {{editable.type}}\" (click)=\"edit(s,ed,$event)\" [id]=\"'sheet_'+s+'_edit_'+ed\"\n          [innerHTML]=\"editable.content | safeHtml\">\n        </div>\n      </div>\n\n      <div class=\"page-break\" [style.top]=\"(pageHeight*page)+'px'\" *ngFor=\"let page of pageCounter | times\">\n        <span>Página {{page}}</span>\n      </div>\n    </div>\n    <ng-container *ngIf=\"mapSigners.length > 0\">\n      <div class=\"map-area\" *ngFor=\"let mapSigner of mapSigners; let i=index\"\n           [style.top]=\"mapSigner.top\" [style.left]=\"mapSigner.left\" [title]=\"mapSigner.idSigner\">\n      </div>\n    </ng-container>\n  </div>\n</div>\n"
 
 /***/ }),
 
@@ -373,7 +420,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".contenedor-hoja {\n  margin: 20px auto 30px;\n  position: relative;\n  overflow: hidden;\n  padding-top: 10px; }\n\ndiv.hoja {\n  background: #fff;\n  width: 21cm;\n  height: 29.7cm;\n  display: block;\n  margin: 0 auto;\n  padding: 1.5cm;\n  margin-bottom: .5cm;\n  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);\n  overflow: visible;\n  box-sizing: border-box;\n  font-size: 12pt;\n  position: relative;\n  zoom: .8;\n  font-family: Arial,Lucida Grande,sans-serif; }\n  div.hoja.loaded {\n    min-height: 29.7cm;\n    height: auto; }\n  div.hoja .inner-hoja {\n    height: 100%; }\n    div.hoja .inner-hoja div.block {\n      margin-bottom: 10px;\n      position: relative; }\n      div.hoja .inner-hoja div.block > button {\n        position: absolute;\n        top: -10px;\n        right: 10px;\n        background: #fff;\n        display: block;\n        padding: 0 5px;\n        opacity: 1;\n        color: #949494;\n        display: none; }\n      div.hoja .inner-hoja div.block:hover {\n        border-color: #000; }\n        div.hoja .inner-hoja div.block:hover > button {\n          display: block; }\n      div.hoja .inner-hoja div.block.active:hover > button {\n        display: none; }\n      div.hoja .inner-hoja div.block .editable-content {\n        border: 1px dashed #aaa;\n        border-radius: 5px;\n        padding: 10px;\n        cursor: pointer; }\n        div.hoja .inner-hoja div.block .editable-content.signers {\n          text-align: center; }\n    div.hoja .inner-hoja .page-break {\n      width: 100%;\n      position: absolute;\n      height: 1px;\n      border: 1px dashed #929292;\n      left: 0px;\n      right: 0;\n      text-align: left;\n      color: #080808;\n      font-size: 11px;\n      margin-top: 1.5cm;\n      opacity: 0.5; }\n      div.hoja .inner-hoja .page-break span {\n        position: absolute;\n        top: 50%;\n        left: 0px;\n        display: block; }\n", ""]);
+exports.push([module.i, ".contenedor-hoja {\n  margin: 20px auto 30px;\n  position: relative;\n  overflow: hidden;\n  padding-top: 10px; }\n\ndiv.hoja {\n  background: #fff;\n  width: 21cm;\n  height: 29.7cm;\n  display: block;\n  margin: 0 auto;\n  padding: 1.5cm;\n  margin-bottom: .5cm;\n  box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);\n  overflow: visible;\n  box-sizing: border-box;\n  font-size: 12pt;\n  position: relative;\n  zoom: .8;\n  font-family: Arial,Lucida Grande,sans-serif; }\n  div.hoja.loaded {\n    min-height: 29.7cm;\n    height: auto; }\n  div.hoja .inner-hoja {\n    height: 100%; }\n    div.hoja .inner-hoja div.block {\n      margin-bottom: 10px;\n      position: relative; }\n      div.hoja .inner-hoja div.block > button {\n        position: absolute;\n        top: -10px;\n        right: 10px;\n        background: #fff;\n        display: block;\n        padding: 0 5px;\n        opacity: 1;\n        color: #949494;\n        display: none; }\n      div.hoja .inner-hoja div.block:hover {\n        border-color: #000; }\n        div.hoja .inner-hoja div.block:hover > button {\n          display: block; }\n      div.hoja .inner-hoja div.block.active:hover > button {\n        display: none; }\n      div.hoja .inner-hoja div.block .editable-content {\n        border: 1px dashed #aaa;\n        border-radius: 5px;\n        padding: 10px;\n        cursor: pointer; }\n        div.hoja .inner-hoja div.block .editable-content.signers {\n          text-align: center; }\n    div.hoja .inner-hoja .page-break {\n      width: 100%;\n      position: absolute;\n      height: 1px;\n      border: 1px dashed #929292;\n      left: 0px;\n      right: 0;\n      text-align: left;\n      color: #080808;\n      font-size: 11px;\n      margin-top: 1.5cm;\n      opacity: 0.5; }\n      div.hoja .inner-hoja .page-break span {\n        position: absolute;\n        top: 50%;\n        left: 0px;\n        display: block; }\n  div.hoja.inPreview .inner-hoja div.block:hover > button {\n    display: none; }\n  div.hoja.inPreview .inner-hoja div.block .editable-content {\n    border: 1px solid transparent;\n    border-radius: 0px;\n    cursor: default; }\n\n.map-area {\n  border: 1px solid #f00;\n  position: absolute;\n  width: 25%;\n  height: 70px;\n  height: 5%;\n  top: 0;\n  left: 0;\n  margin-top: 0px;\n  margin-left: 20px;\n  cursor: pointer; }\n", ""]);
 
 // exports
 
@@ -404,9 +451,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var HojaComponent = (function () {
-    function HojaComponent(editableBlocksService, sanitizer) {
+    function HojaComponent(editableBlocksService, sanitizer, docVarsService) {
         this.editableBlocksService = editableBlocksService;
         this.sanitizer = sanitizer;
+        this.docVarsService = docVarsService;
         this.editorIsOpen = false;
         this.openEditorId = '';
         this.editableBlocks = [];
@@ -416,6 +464,8 @@ var HojaComponent = (function () {
         this.pageHeight = 1;
         this.pageLoaded = false;
         this.isImageSelecting = false;
+        this.mapSigners = [];
+        this.previewMode = false;
     }
     HojaComponent.prototype.ngOnInit = function () {
         var _this = this;
@@ -457,6 +507,16 @@ var HojaComponent = (function () {
             }
         };
         this.editableBlocks = this.editableBlocksService.blocks;
+        this.mapSigners = this.docVarsService.mapSigners;
+        this.subscription = this.docVarsService.getPreviewMode()
+            .subscribe(function (previewMode) {
+            if (previewMode) {
+                if (_this.editorIsOpen) {
+                    _this.save();
+                }
+            }
+            _this.previewMode = previewMode;
+        });
     };
     HojaComponent.prototype.ngAfterViewInit = function () {
         var _this = this;
@@ -479,17 +539,19 @@ var HojaComponent = (function () {
     HojaComponent.prototype.ngDoCheck = function () {
     };
     HojaComponent.prototype.edit = function (sheet, index, event) {
-        if (this.editorIsOpen) {
-            this.save();
-        }
-        this.editorConfig.focus = true;
-        var selector = event.target.id;
-        if (!$('#' + selector).hasClass('signers')) {
-            $('#' + selector).summernote(this.editorConfig);
-            this.openEditorId = selector;
-            this.editorIsOpen = true;
-            this.activeSheet = sheet;
-            this.activeBlock = index;
+        if (!this.previewMode) {
+            if (this.editorIsOpen) {
+                this.save();
+            }
+            this.editorConfig.focus = true;
+            var selector = event.target.id;
+            if (!$('#' + selector).hasClass('signers') && !$('#' + selector).hasClass('space')) {
+                $('#' + selector).summernote(this.editorConfig);
+                this.openEditorId = selector;
+                this.editorIsOpen = true;
+                this.activeSheet = sheet;
+                this.activeBlock = index;
+            }
         }
     };
     HojaComponent.prototype.saveOpenEditable = function (event) {
@@ -543,6 +605,10 @@ var HojaComponent = (function () {
             }, 100);
         }
     };
+    HojaComponent.prototype.ngOnDestroy = function () {
+        // unsubscribe to ensure no memory leaks
+        this.subscription.unsubscribe();
+    };
     return HojaComponent;
 }());
 HojaComponent = __decorate([
@@ -551,10 +617,10 @@ HojaComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/components/editor/hoja/hoja.component.html"),
         styles: [__webpack_require__("../../../../../src/app/components/editor/hoja/hoja.component.scss")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["b" /* DomSanitizer */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["b" /* DomSanitizer */]) === "function" && _b || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["b" /* EditableBlocksService */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["b" /* DomSanitizer */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["b" /* DomSanitizer */]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__services__["a" /* DocVarsService */]) === "function" && _c || Object])
 ], HojaComponent);
 
-var _a, _b;
+var _a, _b, _c;
 //# sourceMappingURL=hoja.component.js.map
 
 /***/ }),
@@ -565,6 +631,8 @@ var _a, _b;
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return DocVarsService; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Subject__ = __webpack_require__("../../../../rxjs/Subject.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Subject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_Subject__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -575,24 +643,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 
+
 var DocVarsService = (function () {
     function DocVarsService() {
+        this.mapSigners = [];
+        this.inPreviewMode = false;
+        this.subject = new __WEBPACK_IMPORTED_MODULE_1_rxjs_Subject__["Subject"]();
         this.signers = [
             {
                 id: 0,
-                name: 'La parte'
+                name: 'Benjamín Sánchez',
+                alias: 'La parte'
             },
             {
                 id: 1,
-                name: 'La contra-parte'
+                name: 'Alfredo Villanueva',
+                alias: 'La contra-parte'
             },
             {
                 id: 2,
-                name: 'Testigo 1'
+                name: 'Angel Herrera',
+                alias: 'Testigo 1'
             },
             {
                 id: 3,
-                name: 'Testigo 2'
+                name: 'Roberto Carrera',
+                alias: 'Testigo 2'
             }
         ];
         this.signersToDoc = [];
@@ -618,6 +694,26 @@ var DocVarsService = (function () {
     };
     DocVarsService.prototype.resetSignersToDoc = function () {
         this.signersToDoc = [];
+    };
+    DocVarsService.prototype.generateMapsSigners = function (coordinates) {
+        for (var _i = 0, coordinates_1 = coordinates; _i < coordinates_1.length; _i++) {
+            var coordinate = coordinates_1[_i];
+            this.mapSigners.push({
+                top: coordinate.top,
+                left: coordinate.left,
+                idSigner: coordinate.idSigner
+            });
+        }
+    };
+    DocVarsService.prototype.resetMapSigners = function () {
+        this.mapSigners.length = 0;
+    };
+    DocVarsService.prototype.setPreviewMode = function (mode) {
+        this.subject.next(mode);
+        this.inPreviewMode = mode;
+    };
+    DocVarsService.prototype.getPreviewMode = function () {
+        return this.subject.asObservable();
     };
     return DocVarsService;
 }());
@@ -701,9 +797,13 @@ var EditableBlocksService = (function () {
                 placeholderElement.content = '';
                 for (var _i = 0, _a = this.docVarsService.signersToDoc; _i < _a.length; _i++) {
                     var signer = _a[_i];
-                    placeholderElement.content += "<div class=\"signerSpace\" id=\"signer_" + signer.id + "\">\n                                          <div class=\"espacioFirma\"></div>\n                                          <div class=\"nombreFirmante\">" + signer.name + "</div>\n                                         </div>";
+                    placeholderElement.content += "<div class=\"signerSpace signer_" + signer.id + "\" data-id=\"" + signer.id + "\">\n                                          <div class=\"espacioFirma\"></div>\n                                          <div class=\"nombreFirmante\">" + signer.alias + "</div>\n                                         </div>";
                 }
                 break;
+            case 'header':
+                placeholderElement.type = 'header';
+                placeholderElement.content =
+                    "En __________________, siendo los __ d\u00EDas del mes de __________ de _____, se celebra el presente\n          Contrato de Compraventa entre __________________________, como Vendedor, y\n          __________________________, como Comprador, respecto del inmueble que se describe a\n          continuaci\u00F3n, de conformidad con lo siguiente:\n          ";
         }
         // placeholderElement = this.sanitizer.bypassSecurityTrustHtml(placeholderElement).toString();
         this.editableBlocks[sheet].push(placeholderElement);
@@ -755,7 +855,7 @@ var _a, _b;
 /***/ "../../../../../src/app/components/editor/toolbar/toolbar.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"contenido-tools\">\n  <div class=\"inner\">\n    <div class=\"bloque-tool\">\n      <p class=\"titulo-bloque\">\n        Elementos\n        <span class=\"hint-text\">Agregue elementos nuevos o predefinidos</span>\n      </p>\n      <ul class=\"herramientas\">\n        <li>\n          <button (click)=\"addBlock()\">\n            <span class=\"glyphicon glyphicon-object-align-left\"></span> Agregar texto\n          </button>\n        </li>\n        <li>\n          <button (click)=\"addBlock('space')\">\n            <span class=\"glyphicon glyphicon-pencil\"></span> Agregar espacio\n          </button>\n        </li>\n        <li>\n          <button data-toggle=\"collapse\" data-target=\"#firmantes\">\n            <span class=\"glyphicon glyphicon-leaf\"></span> Agregar firmantes\n          </button>\n          <div id=\"firmantes\" class=\"collapse inner-opt\">\n            <ul>\n              <li *ngFor=\"let signer of signers;let i=index;\">\n                <input type=\"checkbox\" [id]=\"'firmante'+i\" [value]=\"signer.id\"\n                       (change)=\"addRemoveSignerToDoc(i)\" [checked]=\"checkSigners[i]\">\n                <label [for]=\"'firmante'+i\">{{signer.name}}</label>\n              </li>\n            </ul>\n            <button (click)=\"addSelectedToDoc()\" [disabled]=\"selectedSigners.length < 1\">Agregrar seleccionados</button>\n            <button (click)=\"addAllToDoc()\">Agregra todos</button>\n          </div>\n        </li>\n        <li>\n          <button (click)=\"addBlock('declaration')\">\n            <span class=\"glyphicon glyphicon-list-alt\"></span> Agregar declaración\n          </button>\n        </li>\n        <li>\n          <button (click)=\"addBlock('lorem')\">\n            <span class=\"glyphicon glyphicon-file\"></span> Agregar Lorem\n          </button>\n        </li>\n      </ul>\n    </div>\n  </div>\n</div>\n"
+module.exports = "<div class=\"contenido-tools\">\n  <div class=\"inner\">\n    <div class=\"bloque-tool\">\n      <p class=\"titulo-bloque\">\n        Elementos\n        <span class=\"hint-text\">Agregue elementos nuevos o predefinidos</span>\n      </p>\n      <ul class=\"herramientas\">\n        <li>\n          <button (click)=\"addBlock('header')\">\n            <span class=\"glyphicon glyphicon-header\"></span> Agregar header\n          </button>\n        </li>\n        <li>\n          <button (click)=\"addBlock()\">\n            <span class=\"glyphicon glyphicon-pencil\"></span> Agregar texto\n          </button>\n        </li>\n        <li>\n          <button (click)=\"addBlock('space')\">\n            <span class=\"glyphicon glyphicon-object-align-left\"></span> Agregar espacio\n          </button>\n        </li>\n        <li>\n          <button data-toggle=\"collapse\" data-target=\"#firmantes\">\n            <span class=\"glyphicon glyphicon-leaf\"></span> Agregar firmantes\n          </button>\n          <div id=\"firmantes\" class=\"collapse inner-opt\">\n            <ul>\n              <li *ngFor=\"let signer of signers;let i=index;\">\n                <input type=\"checkbox\" [id]=\"'firmante'+i\" [value]=\"signer.id\"\n                       (change)=\"addRemoveSignerToDoc(i)\" [checked]=\"checkSigners[i]\">\n                <label [for]=\"'firmante'+i\">{{signer.alias}}</label>\n              </li>\n            </ul>\n            <button (click)=\"addSelectedToDoc()\" [disabled]=\"selectedSigners.length < 1\">Agregrar seleccionados</button>\n            <button (click)=\"addAllToDoc()\">Agregra todos</button>\n          </div>\n        </li>\n        <li>\n          <button (click)=\"addBlock('declaration')\">\n            <span class=\"glyphicon glyphicon-list-alt\"></span> Agregar declaración\n          </button>\n        </li>\n        <li>\n          <button (click)=\"addBlock('lorem')\">\n            <span class=\"glyphicon glyphicon-file\"></span> Agregar Lorem\n          </button>\n        </li>\n      </ul>\n    </div>\n  </div>\n</div>\n"
 
 /***/ }),
 
